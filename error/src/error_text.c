@@ -31,3 +31,10 @@ error_text(char *buf, unsigned int buf_size, int err_num)
 
     return num_bytes;
 }
+
+
+void
+set_errno(int err_num)
+{
+    errno = err_num;
+}
