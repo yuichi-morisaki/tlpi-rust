@@ -1,4 +1,9 @@
 pub use libc::{
+    // #include <unistd.h>
+    STDIN_FILENO,   // c_int 0
+    STDOUT_FILENO,  // c_int 1
+    STDERR_FILENO,  // c_int 2
+
 // exit(3)
     // #include <stdlib.h>
     EXIT_SUCCESS,   // c_int 0

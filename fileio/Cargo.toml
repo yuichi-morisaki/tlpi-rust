@@ -9,3 +9,5 @@ edition = "2018"
 [dependencies]
 common = { path = "../common" }
 error = { path = "../error" }
+
+clap = "2.33"
