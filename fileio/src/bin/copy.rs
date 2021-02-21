@@ -4,7 +4,7 @@
 
 use clap::{ Arg, App };
 use common::constants::*;
-use error::error_exit;
+use error::{ error_exit, fatal };
 use fileio::{ open_rs, read_rs, write_rs, close_rs };
 use std::process;
 
@@ -57,13 +57,13 @@ fn run(src_fname: &str, dst_fname: &str) {
             break;
         }
 
-        match write_rs(output_fd, &buf[..num_read]) {
-            Ok(num_bytes) => {
-                if num_bytes < num_read {
-                    error_exit("partial write");
-                }
-            }
+        let num_written = match write_rs(output_fd, &buf[..num_read]) {
+            Ok(num_bytes) => num_bytes,
             Err(_) => error_exit("write"),
+        };
+
+        if num_written < num_read {
+            fatal("partial write");
         }
     }
 
