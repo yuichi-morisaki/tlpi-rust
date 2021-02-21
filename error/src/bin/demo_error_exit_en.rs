@@ -1,5 +1,6 @@
+use common::constants::*;
+use common::data_types::*;
 use error::{ error_exit_en, usage_error };
-use libc::EXIT_FAILURE;
 use std::env;
 use std::process;
 
@@ -11,7 +12,7 @@ fn main() {
         usage_error(&format!("{} errnum", &argv[0]));
     }
 
-    let err_num = match argv[1].parse::<i32>() {
+    let err_num = match argv[1].parse::<c_int>() {
         Ok(err_num) => err_num,
         Err(err) => {
             eprintln!("Failed to parse arg[1] as i32: {}", err);

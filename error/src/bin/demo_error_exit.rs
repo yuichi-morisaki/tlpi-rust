@@ -1,6 +1,6 @@
+use common::data_types::*;
 use error::error_exit;
 use std::env;
-use std::os::raw::c_int;
 
 extern {
     fn set_errno(err_num: c_int);
@@ -11,9 +11,9 @@ fn main() {
     let argc = argv.len();
 
     if argc > 1 {
-        if let Ok(err_num) = argv[1].parse::<i32>() {
+        if let Ok(err_num) = argv[1].parse::<c_int>() {
             unsafe {
-                set_errno(err_num as c_int);
+                set_errno(err_num);
             }
         }
     }

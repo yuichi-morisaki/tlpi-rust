@@ -1,8 +1,6 @@
-use libc::EXIT_FAILURE;
-
+use common::constants::*;
+use common::data_types::*;
 use std::convert::TryFrom;
-use std::ffi::CString;
-use std::os::raw::{ c_char, c_int, c_uint };
 use std::process;
 
 
@@ -17,9 +15,9 @@ extern {
 
 const BUF_SIZE: usize = 500;
 
-pub fn error_text_rs(err_num: Option<i32>) -> Option<String> {
+pub fn error_text_rs(err_num: Option<c_int>) -> Option<String> {
     let mut buf = vec![0; BUF_SIZE];
-    let buf_size = match u32::try_from(BUF_SIZE) {
+    let buf_size = match c_uint::try_from(BUF_SIZE) {
         Ok(size) => size,
         Err(err) => {
             eprintln!("Failed to convert usize to u32: {}", err);
@@ -29,11 +27,7 @@ pub fn error_text_rs(err_num: Option<i32>) -> Option<String> {
     let err_num = err_num.unwrap_or(0);
 
     let result = unsafe {
-        error_text(
-            buf.as_mut_ptr() as *mut c_char,
-            buf_size as c_uint,
-            err_num as c_int,
-        )
+        error_text(buf.as_mut_ptr() as *mut c_char, buf_size, err_num)
     };
 
     if result == -1 {
@@ -41,10 +35,10 @@ pub fn error_text_rs(err_num: Option<i32>) -> Option<String> {
         process::exit(EXIT_FAILURE);
     }
 
-    let num_written = match usize::try_from(result as i32) {
+    let num_written = match usize::try_from(result) {
         Ok(num) => num,
         Err(err) => {
-            eprintln!("Failed to convert i32 to usize: {}", err);
+            eprintln!("Failed to convert c_int to usize: {}", err);
             process::exit(EXIT_FAILURE);
         }
     };
@@ -79,9 +73,8 @@ pub fn error_text_rs(err_num: Option<i32>) -> Option<String> {
 #[cfg(test)]
 mod tests {
     use super::error_text_rs as get_error_text;
-    use std::ffi::CString;
-    use std::os::raw::{ c_char, c_int };
-    use libc::O_RDONLY;
+    use common::data_types::*;
+    use common::constants::*;
 
     extern "C" {
         fn open(path: *const c_char, flags: c_int) -> c_int;

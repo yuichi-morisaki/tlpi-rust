@@ -1,5 +1,6 @@
 [workspace]
 members = [
+    "common",   # ch. 3 - basic data types and constants
     "error",    # ch. 3 - error handling functions
     "fileio",   # ch. 4
 ]

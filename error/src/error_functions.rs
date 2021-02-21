@@ -1,10 +1,10 @@
-use crate::get_error_text;
-
-use libc::EXIT_FAILURE;
-
+use common::constants::*;
+use common::data_types::*;
 use std::env;
 use std::io::{ self, Write };
 use std::process;
+
+use crate::get_error_text;
 
 
 pub fn error_msg(msg: &str) {
@@ -24,7 +24,7 @@ pub fn error_exit2(msg: &str) -> ! {
 }
 
 
-pub fn error_exit_en(err_num: i32, msg: &str) -> ! {
+pub fn error_exit_en(err_num: c_int, msg: &str) -> ! {
     output_error(true, Some(err_num), true, msg);
     terminate(true);
 }
@@ -56,7 +56,7 @@ pub fn cmdline_error(msg: &str) -> ! {
 
 fn output_error(
     use_err_text: bool,
-    err_num: Option<i32>,
+    err_num: Option<c_int>,
     flush_stdout: bool,
     user_msg: &str,
 ) {
@@ -96,7 +96,7 @@ fn terminate(use_exit3: bool) -> ! {
 #[cfg(test)]
 mod tests {
     use super::error_msg;
-    use std::os::raw::c_int;
+    use common::data_types::*;
 
     extern {
         fn set_errno(err_num: c_int);
