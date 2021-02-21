@@ -23,6 +23,12 @@ extern "C" {
     ) -> ssize_t;
 
     fn close(fd: c_int) -> c_int;
+
+    fn lseek(
+        fd: c_int,
+        offset: off_t,
+        whence: c_int
+    ) -> off_t;
 }
 
 
@@ -102,5 +108,18 @@ pub fn close_rs(fd: c_int) -> Result<(), ()> {
         Err(())
     } else {
         Ok(())
+    }
+}
+
+
+pub fn lseek_rs(fd: c_int, offset: off_t, whence: c_int) -> Result<off_t, ()> {
+    let new_offset = unsafe {
+        lseek(fd, offset, whence)
+    };
+
+    if new_offset == -1 {
+        Err(())
+    } else {
+        Ok(new_offset)
     }
 }

@@ -26,4 +26,5 @@ pub use libc::{
     // #include <unistd.h>
     size_t,     // usize
     ssize_t,    // isize
+    off_t,      // i64
 };
