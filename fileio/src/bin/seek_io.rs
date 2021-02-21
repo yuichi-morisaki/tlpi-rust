@@ -21,100 +21,109 @@
 //!
 //!     seek_io myfile wxyz s1 r2
 
+use clap::{ Arg, App, AppSettings, Values };
 use common::constants::*;
 use common::data_types::*;
-use error::{ cmdline_error, error_exit, fatal, usage_error };
+use error::{ cmdline_error, error_exit, fatal };
 use fileio::{ open_rs, read_rs, write_rs, lseek_rs, close_rs };
-use std::env;
 use std::fmt;
 use std::process;
 use std::str::FromStr;
 
 
 fn main() {
-    let argv: Vec<_> = env::args().collect();
-    let argc = argv.len();
+    let matches = App::new("seek_io")
+        .setting(AppSettings::TrailingVarArg)
+        .arg(Arg::with_name("FILE")
+            .required(true)
+            .index(1)
+            .help("File path"))
+        .arg(Arg::with_name("OPERATION")
+            .multiple(true)
+            .required(true)
+            .help("Operation: [r<length>|R<length>|w<string>|s<offset>]"))
+        .get_matches();
 
-    if argc < 3 || argv[1] == "--help" {
-        usage_error(&format!(
-            "{} file {{r<length>|R<length>|w<string>|s<offset>}}...",
-            &argv[0]
-        ));
-    }
+    let fname = matches.value_of("FILE").unwrap();
+    let operations = matches.values_of("OPERATION").unwrap();
 
+    run(fname, operations);
+
+    process::exit(EXIT_SUCCESS);
+}
+
+
+fn run(fname: &str, operations: Values) {
     let open_flags = O_RDWR | O_CREAT;
     let file_perms =
         S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH;
-    let fd = match open_rs(&argv[1], open_flags, Some(file_perms)) {
+    let fd = match open_rs(fname, open_flags, Some(file_perms)) {
         Ok(fd) => fd,
         Err(_) => error_exit("open"),
     };
 
-    for ap in 2..argc {
-        match argv[ap].as_bytes()[0] {
-            b'r' |    // Display bytes at current offset, as text
-            b'R' => { // Display bytes at current offset, as hex
-                let len: usize = parse(&argv[ap].as_bytes()[1..]);
+    for op in operations {
+        let kind = op.as_bytes()[0] as char;
+        let value = std::str::from_utf8(&op.as_bytes()[1..]).unwrap();
+
+        match kind {
+            'r' |    // Display bytes at current offset, as text
+            'R' => { // Display bytes at current offset, as hex
+                let len: usize = parse(value);
                 let mut buf = vec![0; len];
                 let num_read = match read_rs(fd, &mut buf) {
                     Ok(n) => n,
                     Err(_) => error_exit("read"),
                 };
                 if num_read == 0 {
-                    println!("{}: end-of-file", &argv[ap]);
+                    println!("{}: end-of-file", op);
                 } else {
                     buf.truncate(num_read);
-                    if argv[ap].as_bytes()[0] == b'r' {
-                        println!("{}: {}", &argv[ap], read_as_text(&buf));
+                    if kind == 'r' {
+                        println!("{}: {}", op, read_as_text(&buf));
                     } else {
-                        println!("{}: {}", &argv[ap], read_as_hex(&buf));
+                        println!("{}: {}", op, read_as_hex(&buf));
                     }
                 }
             }
 
-            b'w' => { // Write string at current offset
-                let arg = &argv[ap].as_bytes()[1..];
-                match write_rs(fd, arg) {
-                    Ok(num_written) => println!(
-                        "{}: wrote {} bytes", &argv[ap], num_written
-                    ),
+            'w' => { // Write string as current offset
+                match write_rs(fd, value.as_bytes()) {
+                    Ok(num_written) =>
+                        println!("{}: wrote {} bytes", op, num_written),
                     Err(_) => error_exit("write"),
-                };
+                }
             }
 
-            b's' => { // Change file offset
-                let offset: off_t = parse(&argv[ap].as_bytes()[1..]);
+            's' => { // Change file offset
+                let offset: off_t = parse(value);
                 match lseek_rs(fd, offset, SEEK_SET) {
-                    Ok(_) => println!(
-                        "{}: seek succeeded", &argv[ap]
-                    ),
+                    Ok(_) => println!("{}: seek succeeded", op),
                     Err(_) => error_exit("lseek"),
                 };
             }
 
-            _ => cmdline_error(&format!(
-                "Argument must start with [rRws]: {}", &argv[ap]
-            )),
+            _ => cmdline_error(
+                &format!("Argument must start with [rRws]: {}", op)
+            ),
         }
     }
 
     if let Err(_) = close_rs(fd) {
         error_exit("close");
     }
-
-    process::exit(EXIT_SUCCESS);
 }
 
 
-fn parse<T: FromStr>(arg: &[u8]) -> T
+fn parse<T: FromStr>(value: &str) -> T
 where
     T::Err: fmt::Display,
 {
-    let arg = std::str::from_utf8(arg)
-        .expect("Failed to make &str as utf-8");
-    match arg.parse::<T>() {
+    match value.parse::<T>() {
         Ok(n) => n,
-        Err(err) => fatal(&format!("Failed to parse '{}': {}", arg, err)),
+        Err(err) => fatal(
+            &format!("Failed to parse `{}`: {}", value, err)
+        ),
     }
 }
 
