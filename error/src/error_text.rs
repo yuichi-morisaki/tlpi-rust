@@ -10,6 +10,8 @@ extern {
         buf_size: c_uint,
         err_num: c_int
     ) -> c_int;
+
+    fn get_errno() -> c_int;
 }
 
 
@@ -66,6 +68,13 @@ pub fn error_text_rs(err_num: Option<c_int>) -> Option<String> {
         };
 
         Some(err_text)
+    }
+}
+
+
+pub fn get_errno_in_c() -> c_int {
+    unsafe {
+        get_errno()
     }
 }
 

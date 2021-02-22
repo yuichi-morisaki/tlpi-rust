@@ -38,3 +38,9 @@ set_errno(int err_num)
 {
     errno = err_num;
 }
+
+
+int
+get_errno() {
+    return errno;
+}
