@@ -9,12 +9,17 @@ pub use libc::{
     EXIT_SUCCESS,   // c_int 0
     EXIT_FAILURE,   // c_int 1
 
+// ...
+    // #include <errno.h>
+    ENOENT,     // c_int 2
+
 // open(2)
     // #include <fcntl.h>
         // -- file access flags
     O_RDONLY,   // c_int 0
     O_WRONLY,   // c_int 1
     O_RDWR,     // c_int 2
+    O_ACCMODE,  // c_int 3
         // -- file creation flags
     O_CREAT,    // c_int 64     !must be with `mode`
     O_EXCL,     // c_int 128            See ch. 5.1
@@ -50,4 +55,9 @@ pub use libc::{
     SEEK_END,   // c_int 2
     SEEK_DATA,  // c_int 3
     SEEK_HOLE,  // c_int 4
+
+// fcntl(2)
+    // #include <fcntl.h>
+    F_GETFL,    // c_int 3          File status flag
+    F_SETFL,    // c_int 4          File status flag
 };

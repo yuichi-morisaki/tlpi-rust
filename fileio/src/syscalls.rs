@@ -1,13 +1,17 @@
+use common::constants::*;
 use common::data_types::*;
 use error::error_exit;
 use std::convert::TryFrom;
+
+
+type Result<T> = std::result::Result<T, ()>;
 
 
 extern "C" {
     fn open(
         path: *const c_char,
         flags: c_int,
-        ... /* mode: mode_t */
+        ...     // mode: mode_t
     ) -> c_int;
 
     fn read(
@@ -29,6 +33,12 @@ extern "C" {
         offset: off_t,
         whence: c_int
     ) -> off_t;
+
+    fn fcntl(
+        fd: c_int,
+        cmd: c_int,
+        ...     // arg (see man 2 fcntl)
+    ) -> c_int;
 }
 
 
@@ -36,7 +46,7 @@ pub fn open_rs(
     path: &str,
     flags: c_int,
     mode: Option<mode_t>
-) -> Result<c_int, ()> {
+) -> Result<c_int> {
     let path = match CString::new(path) {
         Ok(path) => path.into_bytes(),
         Err(err) => {
@@ -63,7 +73,7 @@ pub fn open_rs(
 }
 
 
-pub fn read_rs(fd: c_int, buf: &mut [u8]) -> Result<usize, ()> {
+pub fn read_rs(fd: c_int, buf: &mut [u8]) -> Result<usize> {
     let count = buf.len() as size_t;
     let buf = buf.as_mut_ptr() as *mut c_char as *mut c_void;
 
@@ -81,7 +91,7 @@ pub fn read_rs(fd: c_int, buf: &mut [u8]) -> Result<usize, ()> {
 }
 
 
-pub fn write_rs(fd: c_int, buf: &[u8]) -> Result<usize, ()> {
+pub fn write_rs(fd: c_int, buf: &[u8]) -> Result<usize> {
     let count = buf.len() as size_t;
     let buf = buf.as_ptr() as *const c_char as *const c_void;
 
@@ -99,7 +109,7 @@ pub fn write_rs(fd: c_int, buf: &[u8]) -> Result<usize, ()> {
 }
 
 
-pub fn close_rs(fd: c_int) -> Result<(), ()> {
+pub fn close_rs(fd: c_int) -> Result<()> {
     let result = unsafe {
         close(fd)
     };
@@ -112,7 +122,7 @@ pub fn close_rs(fd: c_int) -> Result<(), ()> {
 }
 
 
-pub fn lseek_rs(fd: c_int, offset: off_t, whence: c_int) -> Result<off_t, ()> {
+pub fn lseek_rs(fd: c_int, offset: off_t, whence: c_int) -> Result<off_t> {
     let new_offset = unsafe {
         lseek(fd, offset, whence)
     };
@@ -121,5 +131,37 @@ pub fn lseek_rs(fd: c_int, offset: off_t, whence: c_int) -> Result<off_t, ()> {
         Err(())
     } else {
         Ok(new_offset)
+    }
+}
+
+
+pub enum FcntlCmd {
+    GetFl,
+    SetFl(c_int),   // flags
+}
+
+pub fn fcntl_rs(fd: c_int, cmd: FcntlCmd) -> Result<c_int> {
+    match cmd {
+        FcntlCmd::GetFl => {
+            let result = unsafe {
+                fcntl(fd, F_GETFL)
+            };
+            if result == -1 {
+                Err(())
+            } else {
+                Ok(result)
+            }
+        }
+
+        FcntlCmd::SetFl(flags) => {
+            let result = unsafe {
+                fcntl(fd, F_SETFL, flags)
+            };
+            if result == -1 {
+                Err(())
+            } else {
+                Ok(result)
+            }
+        }
     }
 }
