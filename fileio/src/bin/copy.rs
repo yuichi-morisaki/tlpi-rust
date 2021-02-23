@@ -6,7 +6,8 @@ use clap::{ Arg, App };
 use common::constants::*;
 use error::{ error_exit, fatal };
 use std::process;
-use syscall::fileio::{ open_rs, close_rs, read_rs, write_rs };
+use syscall::fs::{ open_rs, close_rs };
+use syscall::io::{ read_rs, write_rs };
 
 
 const BUF_SIZE: usize = 1024;

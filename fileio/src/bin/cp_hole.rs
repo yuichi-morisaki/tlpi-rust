@@ -7,7 +7,8 @@ use error::{ error_exit, fatal };
 use std::cmp;
 use std::convert::TryFrom;
 use std::process;
-use syscall::fileio::{ open_rs, close_rs, read_rs, write_rs, lseek_rs };
+use syscall::fs::{ open_rs, close_rs };
+use syscall::io::{ read_rs, write_rs, lseek_rs };
 
 
 const BUF_SIZE: usize = 4096;

@@ -1,6 +1,6 @@
 use common::data_types::*;
 use error::{ error_exit, fatal };
-use syscall::fileio::{ close_rs, mkstemp_rs };
+use syscall::fs::{ close_rs, mkstemp_rs };
 
 
 fn main() {

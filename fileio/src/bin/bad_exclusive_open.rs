@@ -18,8 +18,8 @@ use error::{ error_exit, get_errno_in_c };
 use std::process;
 use std::thread;
 use std::time::Duration;
-use syscall::fileio::{ open_rs, close_rs };
-use syscall::process::getpid_rs;
+use syscall::fs::{ open_rs, close_rs };
+use syscall::ps::getpid_rs;
 
 
 fn main() {

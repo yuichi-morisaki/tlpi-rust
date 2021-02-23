@@ -2,7 +2,7 @@ use clap::{ Arg, App };
 use common::constants::*;
 use error::error_exit;
 use std::process;
-use syscall::fileio::{ open_rs, close_rs, fcntl_rs, FcntlCmd };
+use syscall::fs::{ open_rs, close_rs, fcntl_rs, FcntlCmd };
 
 
 fn main() {

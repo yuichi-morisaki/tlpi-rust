@@ -28,7 +28,8 @@ use error::{ cmdline_error, error_exit, fatal };
 use std::fmt;
 use std::process;
 use std::str::FromStr;
-use syscall::fileio::{ open_rs, close_rs, read_rs, write_rs, lseek_rs };
+use syscall::fs::{ open_rs, close_rs };
+use syscall::io::{ read_rs, write_rs, lseek_rs };
 
 
 fn main() {
