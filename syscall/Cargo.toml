@@ -1,5 +1,5 @@
 [package]
-name = "fileio"
+name = "syscall"
 version = "0.1.0"
 authors = ["yuichi-morisaki <yuichi.morisaki@gmail.com>"]
 edition = "2018"
@@ -9,6 +9,3 @@ edition = "2018"
 [dependencies]
 common = { path = "../common" }
 error = { path = "../error" }
-syscall = { path = "../syscall" }
-
-clap = "2.33"

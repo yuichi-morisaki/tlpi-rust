@@ -15,10 +15,10 @@
 use clap::{ Arg, App };
 use common::constants::*;
 use error::{ error_exit, get_errno_in_c };
-use fileio::{ open_rs, close_rs };
 use std::process;
 use std::thread;
 use std::time::Duration;
+use syscall::fileio::{ open_rs, close_rs };
 
 
 fn main() {

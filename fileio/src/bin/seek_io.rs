@@ -25,10 +25,10 @@ use clap::{ Arg, App, AppSettings, Values };
 use common::constants::*;
 use common::data_types::*;
 use error::{ cmdline_error, error_exit, fatal };
-use fileio::{ open_rs, read_rs, write_rs, lseek_rs, close_rs };
 use std::fmt;
 use std::process;
 use std::str::FromStr;
+use syscall::fileio::{ open_rs, close_rs, read_rs, write_rs, lseek_rs };
 
 
 fn main() {

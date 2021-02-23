@@ -2,7 +2,7 @@
 
 use common::constants::*;
 use error::error_exit;
-use fileio::open_rs;
+use syscall::fileio::open_rs;
 
 fn main() {
     // Open existing file for reading
