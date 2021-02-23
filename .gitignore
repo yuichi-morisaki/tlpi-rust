@@ -1,3 +1,7 @@
 target/
 Cargo.lock
 ename.c.inc
+
+tfile
+cat.txt
+cat.txt.bak
