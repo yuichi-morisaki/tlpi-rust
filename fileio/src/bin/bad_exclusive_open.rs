@@ -19,6 +19,7 @@ use std::process;
 use std::thread;
 use std::time::Duration;
 use syscall::fileio::{ open_rs, close_rs };
+use syscall::process::getpid_rs;
 
 
 fn main() {
@@ -44,7 +45,7 @@ fn main() {
 
 fn run(fname: &str, sleep: bool) {
     if let Ok(fd) = open_rs(fname, O_WRONLY, None) {
-        println!("[PID {}] File {} already exists", process::id(), fname);
+        println!("[PID {}] File {} already exists", getpid_rs(), fname);
         if let Err(_) = close_rs(fd) {
             error_exit("close");
         }
@@ -54,11 +55,11 @@ fn run(fname: &str, sleep: bool) {
             error_exit("open");
         } else {
             println!(
-                "[PID {}] File {} doesn't exist yet", process::id(), fname);
+                "[PID {}] File {} doesn't exist yet", getpid_rs(), fname);
 
             if sleep {
                 thread::sleep(Duration::from_secs(5));
-                println!("[PID {}] Done sleeping", process::id())
+                println!("[PID {}] Done sleeping", getpid_rs())
             }
 
             let flags = O_WRONLY | O_CREAT;
@@ -68,7 +69,7 @@ fn run(fname: &str, sleep: bool) {
                 Err(_) => error_exit("open"),
             };
             println!(
-                "[PID {}] Created file {} exclusively", process::id(), fname);
+                "[PID {}] Created file {} exclusively", getpid_rs(), fname);
 
             if let Err(_) = close_rs(fd) {
                 error_exit("close");

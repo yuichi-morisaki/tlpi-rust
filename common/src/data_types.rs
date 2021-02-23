@@ -23,8 +23,9 @@ pub use std::ffi::{
 pub use libc::{
     // #include <sys/types.h>
     mode_t,     // u32
+    pid_t,      // i32
     // #include <unistd.h>
+    off_t,      // i64
     size_t,     // usize
     ssize_t,    // isize
-    off_t,      // i64
 };
