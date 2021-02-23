@@ -71,12 +71,24 @@ extern "C" {
 }
 
 pub enum FcntlCmd {
+    DupFd(c_int),   // the lowest file descriptor
     GetFl,
     SetFl(c_int),   // flags
 }
 
 pub fn fcntl_rs(fd: c_int, cmd: FcntlCmd) -> Result<c_int> {
     match cmd {
+        FcntlCmd::DupFd(low_fd) => {
+            let new_fd = unsafe {
+                fcntl(fd, F_DUPFD, low_fd)
+            };
+            if new_fd == -1 {
+                Err(())
+            } else {
+                Ok(new_fd)
+            }
+        }
+
         FcntlCmd::GetFl => {
             let result = unsafe {
                 fcntl(fd, F_GETFL)
@@ -179,5 +191,36 @@ pub fn truncate_rs(path: &str, length: usize) -> Result<()> {
         Err(())
     } else {
         Ok(())
+    }
+}
+
+
+extern "C" {
+    fn dup(old_fd: c_int) -> c_int;
+
+    fn dup2(old_fd: c_int, new_fd: c_int) -> c_int;
+}
+
+pub fn dup_rs(old_fd: c_int) -> Result<c_int> {
+    let new_fd = unsafe {
+        dup(old_fd)
+    };
+
+    if new_fd == -1 {
+        Err(())
+    } else {
+        Ok(new_fd)
+    }
+}
+
+pub fn dup2_rs(old_fd: c_int, new_fd: c_int) -> Result<c_int> {
+    let new_fd = unsafe {
+        dup2(old_fd, new_fd)
+    };
+
+    if new_fd == -1 {
+        Err(())
+    } else {
+        Ok(new_fd)
     }
 }

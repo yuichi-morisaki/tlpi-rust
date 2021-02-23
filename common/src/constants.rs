@@ -11,7 +11,8 @@ pub use libc::{
 
 // ...
     // #include <errno.h>
-    ENOENT,     // c_int 2
+    ENOENT,     // c_int 2      No such file or directory
+    EBADF,      // c_int 9      Bad file descriptor
 
 // open(2)
     // #include <fcntl.h>
@@ -58,6 +59,7 @@ pub use libc::{
 
 // fcntl(2)
     // #include <fcntl.h>
+    F_DUPFD,    // c_int 0          Duplicating a file descriptor
     F_GETFL,    // c_int 3          File status flag
     F_SETFL,    // c_int 4          File status flag
 };

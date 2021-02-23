@@ -12,6 +12,8 @@ extern {
     ) -> c_int;
 
     fn get_errno() -> c_int;
+
+    fn set_errno(err_num: c_int);
 }
 
 
@@ -75,6 +77,13 @@ pub fn error_text_rs(err_num: Option<c_int>) -> Option<String> {
 pub fn get_errno_in_c() -> c_int {
     unsafe {
         get_errno()
+    }
+}
+
+
+pub fn set_errno_in_c(err_num: c_int) {
+    unsafe {
+        set_errno(err_num);
     }
 }
 

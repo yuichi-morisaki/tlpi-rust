@@ -10,4 +10,5 @@ pub use error_functions::usage_error;
 pub use error_functions::cmdline_error;
 
 pub use error_text::get_errno_in_c;
+pub use error_text::set_errno_in_c;
 use error_text::error_text_rs as get_error_text;
