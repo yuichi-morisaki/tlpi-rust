@@ -1,6 +1,8 @@
+use common::constants::*;
 use common::data_types::*;
 use error::{ error_exit, fatal };
-use syscall::fs::{ close_rs, mkstemp_rs };
+use std::process;
+use syscall::fs::{ close_rs, mkstemp_rs, unlink_rs };
 
 
 fn main() {
@@ -16,20 +18,32 @@ fn main() {
         Ok(fd) => fd,
     };
 
-    let temp_fname = match std::str::from_utf8(&template) {
+    let tmp_fname = match CStr::from_bytes_with_nul(&template) {
         Err(err) => fatal(
-            &format!("Failed to create &str: {}", err)
+            &format!("Failed to restore CStr from &[u8]: {}", err)
         ),
-        Ok(s) => s,
+        Ok(cstr) => match cstr.to_str() {
+            Err(err) => fatal(
+                &format!("Failed to convert CStr into str: {}", err)
+            ),
+            Ok(s) => s,
+        }
     };
 
-    println!("Generated filename was: {}", temp_fname);
+    println!("Generated filename was: {}", tmp_fname);
 
-    // unlink(template);    // TODO
+    // Name disappears immediately, but the file is removed after close()
+    if let Err(_) = unlink_rs(tmp_fname) {
+        error_exit("unlink");
+    }
+
 
     // Use file I?O system calls - read(), write(), and so on.
+
 
     if let Err(_) = close_rs(fd) {
         error_exit("close");
     }
+
+    process::exit(EXIT_SUCCESS);
 }

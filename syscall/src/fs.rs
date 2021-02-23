@@ -1,6 +1,7 @@
 use common::constants::*;
 use common::data_types::*;
 use error::fatal;
+use std::convert::TryFrom;
 
 type Result<T> = std::result::Result<T, ()>;
 
@@ -19,14 +20,13 @@ pub fn open_rs(
     mode: Option<mode_t>
 ) -> Result<c_int> {
     let path = match CString::new(path) {
-        Ok(path) => path.into_bytes(),
-        Err(err) => {
-            fatal(
-                &format!("File path is invalid for CString: {}", err)
-            );
-        }
+        Ok(path) => path.into_bytes_with_nul(),
+        Err(err) => fatal(
+            &format!("File path is invalid for CString: {}", err)
+        ),
     };
-    let path = path.as_ptr() as *const c_char;
+    let path: *const u8 = path.as_ptr();
+    let path = path as *const i8 as *const c_char;
 
     let fd = unsafe {
         if let Some(mode) = mode {
@@ -117,5 +117,67 @@ pub fn mkstemp_rs(template: &mut [u8]) -> Result<c_int> {
         Err(())
     } else {
         Ok(fd)
+    }
+}
+
+
+extern "C" {
+    fn unlink(path: *const c_char) -> c_int;
+}
+
+pub fn unlink_rs(path: &str) -> Result<()> {
+    let path = match CString::new(path) {
+        Err(err) => fatal(
+            &format!("Failed to create CString: {}", err)
+        ),
+        Ok(path) => path.into_bytes_with_nul(),
+    };
+    let path: *const u8 = path.as_ptr();
+    let path = path as *const i8 as *const c_char;
+
+    let result = unsafe {
+        unlink(path)
+    };
+
+    if result == -1 {
+        Err(())
+    } else {
+        Ok(())
+    }
+}
+
+
+extern "C" {
+    fn truncate(
+        path: *const c_char,
+        length: off_t,
+    ) -> c_int;
+}
+
+pub fn truncate_rs(path: &str, length: usize) -> Result<()> {
+    let path = match CString::new(path) {
+        Err(err) => fatal(
+            &format!("Failed to create CString: {}", err)
+        ),
+        Ok(path) => path.into_bytes_with_nul(),
+    };
+    let path: *const u8 = path.as_ptr();
+    let path = path as *const i8 as *const c_char;
+
+    let length = match off_t::try_from(length) {
+        Err(err) => fatal(
+            &format!("Failed to convert usize into off_t: {}", err)
+        ),
+        Ok(n) => n,
+    };
+
+    let result = unsafe {
+        truncate(path, length)
+    };
+
+    if result == -1 {
+        Err(())
+    } else {
+        Ok(())
     }
 }
