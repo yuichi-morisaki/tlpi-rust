@@ -1,4 +1,4 @@
-//! Practice 4-2.
+//! Exercise 4-2
 
 use clap::{ Arg, App };
 use common::constants::*;
